@@ -41,4 +41,32 @@ describe Raven::Processor::SanitizeData do
     result["ccnumba"].should eq(Raven::Processor::SanitizeData::MASK)
   end
 
+  it 'should cleanup circular dependendencies' do
+    data = {}
+    data['data'] = data
+    data['ary'] = []
+    data['ary'].push('x' => data['ary'])
+    data['ary2'] = data['ary']
+
+    result = @processor.process(data)
+    result['data'].should eq('{...}')
+    result['ary'].first['x'].should eq('[...]')
+    result['ary2'].should_not eq('[...]')
+  end
+
+  it 'should not fail because of invalid byte sequence in UTF-8' do
+    data = {}
+    data['invalid'] = "invalid utf8 string goes here\255".force_encoding('UTF-8')
+
+    expect { @processor.process(data) }.not_to raise_error(ArgumentError)
+  end
+
+  it 'should cleanup invalid UTF-8 bytes' do
+    data = {}
+    data['invalid'] = "invalid utf8 string goes here\255".force_encoding('UTF-8')
+
+    results = @processor.process(data)
+    results['invalid'].should eq("invalid utf8 string goes here")
+  end
+
 end
