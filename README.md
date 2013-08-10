@@ -143,6 +143,19 @@ Raven.configure do |config|
 end
 ```
 
+You can find the list of exceptions that are excluded by default in [Raven::Configuration::IGNORE_DEFAULT](https://github.com/getsentry/raven-ruby/blob/master/lib/raven/configuration.rb#L74-L80). Remember you'll be overriding those defaults by setting this configuration.
+
+### Tags
+
+You can configure default tags to be sent with every event. These can be
+overridden in the context or event.
+
+```ruby
+Raven.configure do |config|
+  config.tags = { environment: Rails.env }
+end
+```
+
 ### SSL Verification
 
 By default SSL certificate verification is **disabled** in the client. This choice
